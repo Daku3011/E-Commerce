@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail | Lumina</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/shop.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-layer-group"></i> Lumina<span>.</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html" class="active">Shop</a></li>
+            </ul>
+            <div class="nav-icons">
+                <button id="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" id="auth-link" aria-label="User account">
+                    <i class="fas fa-user"></i>
+                </a>
+                <a href="cart.html" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-badge" class="badge" style="display: none;">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Detail Container -->
+    <section class="container product-detail-container">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px; font-size: 0.9rem;">
+            <a href="index.html" class="text-secondary hover:text-primary">Home</a> >
+            <a href="products.html" class="text-secondary hover:text-primary">Shop</a> >
+            <span id="breadcrumb-current">Product Details</span>
+        </div>
+
+        <div id="product-detail-area">
+            <!-- Injected via JS -->
+            <div style="text-align: center; padding: 50px;">
+                <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Similar Products -->
+    <section class="products-section bg-surface">
+        <div class="container">
+            <h2 class="section-title">You Might Also Like</h2>
+            <div class="grid" id="similar-products">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-bottom" style="margin-top: 0; padding-top: 20px;">
+            &copy; 2026 Lumina. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const detailArea = document.getElementById('product-detail-area');
+            const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+
+            // Get Product ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = parseInt(urlParams.get('id'));
+
+            if (!productId) {
+                detailArea.innerHTML = '<h2>Product not found. <a href="products.html">Return to Shop</a></h2>';
+                return;
+            }
+
+            const products = DataService.getProducts();
+            const product = products.find(p => p.id === productId);
+
+            if (!product) {
+                detailArea.innerHTML = '<h2>Product not found in our records. <a href="products.html">Return to Shop</a></h2>';
+                return;
+            }
+
+            breadcrumbCurrent.textContent = product.name;
+
+            // Render Product Detail
+            const starsHtml = generateStars(product.rating);
+            detailArea.innerHTML = `
+                <div class="product-detail-grid">
+                    <div class="detail-img-wrap">
+                        <img src="${product.image}" alt="${product.name}" id="main-image">
+                    </div>
+                    <div class="detail-info">
+                        <div class="product-badge" style="position: static; display: inline-block; margin-bottom: 15px;">${product.category}</div>
+                        <h1>${product.name}</h1>
+                        <div class="detail-rating">
+                            ${starsHtml}
+                            <span class="text-muted">(${product.reviews} Customer Reviews)</span>
+                        </div>
+                        <div class="detail-price">${formatPrice(product.price)}</div>
+                        <p class="detail-desc">${product.details}</p>
+                        
+                        <div class="detail-actions">
+                            <div class="qty-control">
+                                <button onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                                <input type="number" id="detail-qty" value="1" min="1" max="10" readonly>
+                                <button onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+                            </div>
+                            <button class="btn btn-primary" onclick="addToCartDetailed(${product.id})" style="flex:1;">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <button class="btn btn-outline" style="padding: 12px 15px;" onclick="addToWishlist()">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="detail-meta">
+                            <p><span>SKU:</span> LUM-${product.id.toString().padStart(4, '0')}</p>
+                            <p><span>Category:</span> <a href="products.html?category=${product.category.toLowerCase()}" class="text-primary">${product.category}</a></p>
+                            <p><span>Availability:</span> <span class="text-secondary" style="color:var(--secondary)"><i class="fas fa-check-circle"></i> In Stock</span></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Render Similar Items
+            const similarProductsContainer = document.getElementById('similar-products');
+            const similarItems = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+
+            if (similarItems.length > 0) {
+                similarProductsContainer.innerHTML = similarItems.map(p => {
+                    const stars = generateStars(p.rating);
+                    const price = formatPrice(p.price);
+                    return `
+                    <div class="product-card">
+                        <a href="product-detail.html?id=${p.id}" class="product-img-wrap">
+                            <img src="${p.image}" alt="${p.name}" class="product-img">
+                        </a>
+                        <div class="product-info">
+                            <h3 class="product-title"><a href="product-detail.html?id=${p.id}">${p.name}</a></h3>
+                            <div class="product-bottom">
+                                <span class="product-price">${price}</span>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                document.querySelector('.products-section').style.display = 'none';
+            }
+        });
+
+        // Quantity handlers
+        window.changeQty = function (amount) {
+            const input = document.getElementById('detail-qty');
+            let val = parseInt(input.value) + amount;
+            if (val < 1) val = 1;
+            if (val > 10) val = 10;
+            input.value = val;
+        };
+
+        window.addToCartDetailed = function (productId) {
+            const qty = parseInt(document.getElementById('detail-qty').value);
+            let cart = DataService.getCart();
+            const existingItem = cart.find(item => item.productId === productId);
+
+            if (existingItem) {
+                existingItem.quantity += qty;
+            } else {
+                cart.push({ productId: productId, quantity: qty });
+            }
+
+            DataService.setCart(cart);
+            updateCartBadge();
+            alert(`Added ${qty} item(s) to cart!`);
+        };
+
+        window.addToWishlist = function () {
+            alert('Added to wishlist (Simulated)');
+        }
+    </script>
+</body>
+
+</html>

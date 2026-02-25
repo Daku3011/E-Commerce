@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Lumina</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/shop.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+
+<body>
+
+    <!-- Navbar Minimal for checkout -->
+    <nav class="navbar" style="padding: 15px 0;">
+        <div class="container" style="display:flex; justify-content:center;">
+            <a href="index.html" class="logo">
+                <i class="fas fa-layer-group"></i> Lumina<span>.</span> Secure Checkout
+            </a>
+        </div>
+    </nav>
+
+    <section class="container cart-container" style="padding: 60px 20px;">
+        <!-- Left: Form -->
+        <div class="cart-items checkout-form">
+            <h2 style="margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                Shipping & Billing Information</h2>
+
+            <form id="checkout-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" required id="fName">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" required id="lName">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" required id="email">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Shipping Address</label>
+                    <input type="text" class="form-control" required placeholder="123 Main St" id="address">
+                </div>
+
+                <h3 style="margin: 30px 0 20px;">Payment Information (Simulated)</h3>
+                <div class="form-group">
+                    <label class="form-label">Name on Card</label>
+                    <input type="text" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Card Number</label>
+                    <input type="text" class="form-control" required placeholder="0000 0000 0000 0000">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="text" class="form-control" required placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV</label>
+                        <input type="text" class="form-control" required placeholder="123">
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary"
+                        style="width: 100%; font-size: 1.1rem; padding: 15px;">
+                        <i class="fas fa-lock"></i> Place Order
+                    </button>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="cart.html" class="text-secondary hover:text-primary">Return to Cart</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right: Summary -->
+        <div class="cart-summary" id="checkout-summary">
+            <!-- Rendered by JS -->
+        </div>
+    </section>
+
+    <!-- Core Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const summaryArea = document.getElementById('checkout-summary');
+            const form = document.getElementById('checkout-form');
+
+            const allProducts = DataService.getProducts();
+            const cart = DataService.getCart();
+
+            if (cart.length === 0) {
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            // Populate User info if logged in
+            const user = DataService.getCurrentUser();
+            if (user && user.name) {
+                const names = user.name.split(' ');
+                document.getElementById('fName').value = names[0] || '';
+                document.getElementById('lName').value = names[1] || '';
+                document.getElementById('email').value = user.email || '';
+            }
+
+            // Render summary sidebar
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            cart.forEach(item => {
+                const product = allProducts.find(p => p.id === item.productId);
+                if (product) {
+                    subtotal += product.price * item.quantity;
+                    itemsHtml += `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size: 0.9rem;">
+                            <span>${item.quantity}x ${product.name}</span>
+                            <span style="font-weight:600;">${formatPrice(product.price * item.quantity)}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            const tax = subtotal * 0.05;
+            const total = subtotal + tax;
+
+            summaryArea.innerHTML = `
+                <h3 class="summary-title">Order Summary</h3>
+                <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+                    ${itemsHtml}
+                </div>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>${formatPrice(subtotal)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (5%)</span>
+                    <span>${formatPrice(tax)}</span>
+                </div>
+                <div class="summary-row" style="color:var(--secondary);">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div>
+                
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>${formatPrice(total)}</span>
+                </div>
+            `;
+
+            // Handle Submit
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Create Order Object
+                const orderId = 'ORD-' + Math.floor(Math.random() * 1000000);
+                const address = document.getElementById('address').value;
+
+                const newOrder = {
+                    orderId,
+                    userId: user ? user.id : 'guest',
+                    date: new Date().toISOString(),
+                    items: cart,
+                    total: total,
+                    status: 'Pending',
+                    shippingAddress: address
+                };
+
+                let orders = JSON.parse(localStorage.getItem('ecommerce_orders') || "[]");
+                orders.push(newOrder);
+                localStorage.setItem('ecommerce_orders', JSON.stringify(orders));
+
+                // Clear Cart
+                DataService.setCart([]);
+
+                // Alert and redirect
+                alert('Order Placed Successfully! Order ID: ' + orderId);
+
+                if (user) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Lumina</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cart.css">
+    <style>
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 150px);
+            padding: 40px 20px;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: -2px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-layer-group"></i> Lumina<span>.</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Auth Section -->
+    <section class="auth-container bg-main">
+        <div class="checkout-form auth-box">
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
+                <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" class="auth-form active">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="login-email" required
+                        placeholder="admin@admin.com or user">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="login-password" required placeholder="admin">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Login</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="reg-name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="reg-email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="reg-password" required>
+                </div>
+                <!-- Admin secret checkbox purely for debugging purposes -->
+                <div class="form-group" style="display: flex; gap:10px; align-items: center; margin-top: 10px;">
+                    <input type="checkbox" id="reg-admin">
+                    <label class="form-label" style="margin-bottom: 0;">Register as Admin (Demo only)</label>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Create
+                    Account</button>
+            </form>
+
+        </div>
+    </section>
+
+    <!-- Core Scripts -->
+    <script src="js/data.js"></script>
+    <script>
+        // Init default admin user
+        function initUsers() {
+            let users = JSON.parse(localStorage.getItem('ecommerce_users') || "[]");
+            if (users.length === 0) {
+                users.push({
+                    id: 'usr_admin',
+                    name: 'Admin User',
+                    email: 'admin@admin.com',
+                    password: 'admin',
+                    role: 'admin'
+                });
+                localStorage.setItem('ecommerce_users', JSON.stringify(users));
+            }
+        }
+        initUsers();
+
+        // UI Tabs
+        window.switchTab = function (tab) {
+            document.getElementById('tab-login').classList.remove('active');
+            document.getElementById('tab-register').classList.remove('active');
+            document.getElementById('form-login').classList.remove('active');
+            document.getElementById('form-register').classList.remove('active');
+
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('form-' + tab).classList.add('active');
+        };
+
+        // Login Submit
+        document.getElementById('form-login').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+
+            const users = JSON.parse(localStorage.getItem('ecommerce_users') || "[]");
+            const user = users.find(u => u.email === email && u.password === pass);
+
+            if (user) {
+                // Delete password before saving to active session
+                const activeSession = { ...user };
+                delete activeSession.password;
+
+                localStorage.setItem('ecommerce_currentUser', JSON.stringify(activeSession));
+
+                if (user.role === 'admin') {
+                    window.location.href = 'admin/index.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } else {
+                alert('Invalid email or password');
+            }
+        });
+
+        // Register Submit
+        document.getElementById('form-register').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+            const isAdmin = document.getElementById('reg-admin').checked;
+
+            let users = JSON.parse(localStorage.getItem('ecommerce_users') || "[]");
+
+            if (users.find(u => u.email === email)) {
+                alert('Email already exists');
+                return;
+            }
+
+            const newUser = {
+                id: 'usr_' + Date.now(),
+                name: name,
+                email: email,
+                password: pass,
+                role: isAdmin ? 'admin' : 'user'
+            };
+
+            users.push(newUser);
+            localStorage.setItem('ecommerce_users', JSON.stringify(users));
+
+            // Auto login
+            const activeSession = { ...newUser };
+            delete activeSession.password;
+            localStorage.setItem('ecommerce_currentUser', JSON.stringify(activeSession));
+
+            if (newUser.role === 'admin') {
+                window.location.href = 'admin/index.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Redirect if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = DataService.getCurrentUser();
+            if (user) {
+                if (user.role === 'admin') window.location.href = 'admin/index.html';
+                else window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

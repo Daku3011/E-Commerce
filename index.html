@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina | Premium E-Commerce</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-layer-group"></i> Lumina<span>.</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="products.html?category=electronics">Electronics</a></li>
+                <li><a href="products.html?category=fashion">Fashion</a></li>
+            </ul>
+            
+            <div class="nav-icons">
+                <button id="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" id="auth-link" aria-label="User account">
+                    <i class="fas fa-user"></i>
+                </a>
+                <a href="cart.html" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-badge" class="badge" style="display: none;">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">New Arrival 2026</div>
+                <h1 class="hero-title">Discover the next level of electronics & style.</h1>
+                <p class="hero-desc">Explore our hand-picked collection of premium gadgets, comfortable apparel, and chic accessories designed to elevate your everyday life.</p>
+                <div style="display: flex; gap: 15px; justify-content: flex-start;">
+                    <a href="products.html" class="btn btn-primary">
+                        Shop Now <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#featured" class="btn btn-outline">
+                        View Deals
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image-wrapper">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80" alt="Premium Headphones" class="hero-img">
+            </div>
+        </div>
+    </header>
+
+    <!-- Categories Section -->
+    <section class="categories-section">
+        <div class="container">
+            <h2 class="section-title">Shop by Category</h2>
+            <div class="category-grid" id="category-container">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="products-section" id="featured">
+        <div class="container">
+            <h2 class="section-title">Featured Products</h2>
+            <div class="grid" id="featured-products-container">
+                <!-- Products will be injected here via JS -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="products.html" class="btn btn-outline" style="min-width: 200px;">
+                    View All Products
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="logo" style="margin-bottom: 20px;">
+                        <i class="fas fa-layer-group"></i> Lumina<span>.</span>
+                    </a>
+                    <p>Your one-stop destination for premium, high-quality products curated just for you. Experience seamless shopping.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="login.html">My Account</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Newsletter</h3>
+                    <p>Subscribe to receive updates, access to exclusive deals, and more.</p>
+                    <div style="display:flex; margin-top: 15px; gap: 10px;">
+                        <input type="email" placeholder="Enter your email" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                        <button class="btn btn-primary" style="padding: 10px 15px;"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Lumina. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <!-- Page Specific Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const products = DataService.getProducts();
+            const categories = DataService.getCategories();
+            
+            // Render Categories
+            const catContainer = document.getElementById('category-container');
+            if (catContainer) {
+                categories.forEach(cat => {
+                    const card = document.createElement('a');
+                    card.href = `products.html?category=${cat.name.toLowerCase()}`;
+                    card.className = 'category-card';
+                    card.innerHTML = `
+                        <i class="fas ${cat.icon} category-icon"></i>
+                        <h3 class="category-title">${cat.name}</h3>
+                    `;
+                    catContainer.appendChild(card);
+                });
+            }
+
+            // Render Featured Products (first 4)
+            const featuredContainer = document.getElementById('featured-products-container');
+            if (featuredContainer && products.length > 0) {
+                const featured = products.slice(0, 4);
+                featured.forEach(product => {
+                    const stars = generateStars(product.rating);
+                    const price = formatPrice(product.price);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <div class="product-badge">${product.category}</div>
+                        <a href="product-detail.html?id=${product.id}" class="product-img-wrap">
+                            <img src="${product.image}" alt="${product.name}" class="product-img">
+                        </a>
+                        <div class="product-info">
+                            <h3 class="product-title"><a href="product-detail.html?id=${product.id}">${product.name}</a></h3>
+                            <div class="product-rating">
+                                ${stars} <span class="text-muted">(${product.reviews})</span>
+                            </div>
+                            <div class="product-bottom">
+                                <span class="product-price">${price}</span>
+                                <button class="btn-add-cart" onclick="quickAddToCart(${product.id})" aria-label="Add to cart">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    featuredContainer.appendChild(card);
+                });
+            }
+        });
+
+        // Quick add to cart function
+        window.quickAddToCart = function(productId) {
+            let cart = DataService.getCart();
+            const existingItem = cart.find(item => item.productId === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ productId: productId, quantity: 1 });
+            }
+            
+            DataService.setCart(cart);
+            updateCartBadge();
+            
+            // Toast notification (simplistic)
+            alert('Added to cart!');
+        };
+    </script>
+</body>
+</html>

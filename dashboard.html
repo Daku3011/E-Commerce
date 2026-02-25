@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | Lumina</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            display: flex;
+            gap: 40px;
+            padding: 40px 0;
+            min-height: 70vh;
+        }
+
+        .dashboard-sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            padding: 30px 20px;
+            height: fit-content;
+        }
+
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 15px;
+        }
+
+        .dashboard-nav {
+            margin-top: 30px;
+        }
+
+        .dashboard-nav li {
+            margin-bottom: 15px;
+        }
+
+        .dashboard-nav a,
+        .dashboard-nav button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .dashboard-nav a:hover,
+        .dashboard-nav button:hover,
+        .dashboard-nav a.active {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .dashboard-main {
+            flex: 1;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+        }
+
+        .order-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-Pending {
+            background: #fef08a;
+            color: #854d0e;
+        }
+
+        .status-Shipped {
+            background: #bae6fd;
+            color: #0369a1;
+        }
+
+        .status-Delivered {
+            background: #bbf7d0;
+            color: #166534;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-layer-group"></i> Lumina<span>.</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <button id="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="cart.html" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-badge" class="badge" style="display: none;">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard -->
+    <section class="container dashboard-container">
+
+        <aside class="dashboard-sidebar">
+            <div style="text-align: center;">
+                <div class="profile-img" id="user-initials">U</div>
+                <h3 id="user-name" style="margin-bottom: 5px;">User Name</h3>
+                <p class="text-secondary" id="user-email" style="font-size: 0.9rem;">user@example.com</p>
+            </div>
+
+            <ul class="dashboard-nav">
+                <li><a href="#" class="active"><i class="fas fa-box"></i> Order History</a></li>
+                <li><a href="#"><i class="fas fa-heart"></i> Wishlist</a></li>
+                <li><a href="#"><i class="fas fa-user-cog"></i> Account Settings</a></li>
+                <li style="margin-top: 40px;">
+                    <button id="logout-btn" style="color: var(--danger);">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="dashboard-main">
+            <h2 style="font-size: 2rem; margin-bottom: 30px;">Your Orders</h2>
+
+            <div id="orders-container">
+                <!-- Injected via JS -->
+                <div style="text-align: center; padding: 50px;">
+                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                </div>
+            </div>
+        </main>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-bottom" style="margin-top: 0; padding-top: 20px;">
+            &copy; 2026 Lumina. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = DataService.getCurrentUser();
+
+            // Protect Route
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Fill sidebar
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('user-email').textContent = currentUser.email;
+            document.getElementById('user-initials').textContent = currentUser.name.charAt(0).toUpperCase();
+
+            // Load Orders
+            const ordersList = JSON.parse(localStorage.getItem('ecommerce_orders') || "[]");
+            const myOrders = ordersList.filter(o => o.userId === currentUser.id || o.userId === 'guest');
+
+            const container = document.getElementById('orders-container');
+            const allProducts = DataService.getProducts();
+
+            if (myOrders.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 50px 0;">
+                        <i class="fas fa-box-open" style="font-size:4rem; color: var(--border-color); margin-bottom:20px;"></i>
+                        <h3>You have no orders yet.</h3>
+                        <a href="products.html" class="btn btn-primary" style="margin-top: 20px;">Start Shopping</a>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                // sort descending by date
+                myOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                myOrders.forEach(order => {
+                    const date = new Date(order.date).toLocaleDateString(undefined, {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+
+                    let itemsHtml = '';
+                    order.items.forEach(item => {
+                        const prod = allProducts.find(p => p.id === item.productId);
+                        if (prod) {
+                            itemsHtml += `
+                                <div style="display: flex; gap:15px; margin-bottom:10px; align-items:center;">
+                                    <img src="${prod.image}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;">
+                                    <div>
+                                        <div style="font-weight:600;">${prod.name}</div>
+                                        <div class="text-secondary">Qty: ${item.quantity} | ${formatPrice(prod.price)}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    html += `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div>
+                                    <strong style="color:var(--text-primary);">Order #${order.orderId}</strong>
+                                    <div style="font-size: 0.9rem;">Placed on ${date}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="badge-status status-${order.status}">${order.status}</span>
+                                    <div style="font-weight: 700; color:var(--text-primary); margin-top:5px; font-size:1.1rem;">
+                                        ${formatPrice(order.total)}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-items">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('ecommerce_currentUser');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+
+</html>
